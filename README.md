@@ -83,3 +83,9 @@ Server tab: http://cubeupload.com/im/ULaIR7.jpg
 Admin chat tab: http://cubeupload.com/im/bvRXoM.jpg
 
 ACL tab: http://cubeupload.com/im/0OoEvo.jpg, http://cubeupload.com/im/mVcT11.jpg
+
+Toggle key: P
+
+IMPORTANT:
+
+You must make at least ONE person an Admin, for this you must put the Steam ID in server/admin_server.lua -> "firstAdmin" variable, from then, you can make others Admin by using the panel ( P key ).
