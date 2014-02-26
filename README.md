@@ -88,4 +88,4 @@ Toggle key: P
 
 IMPORTANT:
 
-You must make at least ONE person an Admin, for this you must put the Steam ID in server/admin_server.lua -> "firstAdmin" variable, from then, you can make others Admin by using the panel ( P key ).
+You must make at least ONE person an Admin, for this you must put the Steam ID in server/admin_server.lua -> "firstAdmin" variable, from then, you can make others Admin by using the panel.
