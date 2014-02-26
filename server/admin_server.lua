@@ -1,6 +1,6 @@
 class "Admin"
 
-local firstAdmin = "STEAM_0:0:41980773"
+local firstAdmin = "Your Steam ID Here" -- CHANGE IT!
 local msgColors =
 	{
 		[ "err" ] = Color ( 255, 0, 0 ),
