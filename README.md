@@ -61,7 +61,7 @@ Commands:
 
 /giveweap <player> <weapon ID> -> Gives 100 ammo ( 30 magazine, 70 extra ammo ) of the specified weapon.
 
-/giveadmin <player> -> Sets the ACL group of the player to "Admin".
+/giveadmin <player> -> Adds the player to the "Admin" ACL group.
 
 /takeadmin <player> -> Removes the player from the "Admin" ACL group.
 
