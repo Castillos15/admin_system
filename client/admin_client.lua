@@ -382,11 +382,9 @@ function Admin:returnPermissions ( perms )
 end
 
 function Admin:addPlayerToList ( player )
-	if IsValid ( player ) then
-		local item = self.panel.playersList:AddItem ( player:GetName ( ) )
-		item:SetDataObject ( "id", player )
-		self.players [ player:GetSteamId ( ) ] = item
-	end
+	local item = self.panel.playersList:AddItem ( player:GetName ( ) )
+	item:SetDataObject ( "id", player )
+	self.players [ player:GetSteamId ( ) ] = item
 end
 
 function Admin:loadPlayersToList ( )
