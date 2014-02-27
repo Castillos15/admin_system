@@ -497,7 +497,7 @@ function Admin:executeAction ( args, player )
 				if IsValid ( args [ 2 ] ) then
 					if ACL:groupAddObject ( "Admin", tostring ( args [ 2 ]:GetSteamId ( ) ) ) then
 						player:Message ( "You gave admin rights to ".. args [ 2 ]:GetName ( ) .."!", "info" )
-						player:Message ( player:GetName ( ) .." has given you admin rights!", "info" )
+						args [ 2 ]:Message ( player:GetName ( ) .." has given you admin rights!", "info" )
 						self:requestInformation ( args [ 2 ], player )
 					else
 						player:Message ( "Failed to give admin rights to ".. args [ 2 ]:GetName ( ) .."!", "err" )
@@ -509,7 +509,7 @@ function Admin:executeAction ( args, player )
 				if IsValid ( args [ 2 ] ) then
 					if ACL:groupRemoveObject ( "Admin", tostring ( args [ 2 ]:GetSteamId ( ) ) ) then
 						player:Message ( "You revoked ".. args [ 2 ]:GetName ( ) .."'s admin rights!", "err" )
-						player:Message ( player:GetName ( ) .." has revoked your admin rights!", "err" )
+						args [ 2 ]:Message ( player:GetName ( ) .." has revoked your admin rights!", "err" )
 						self:requestInformation ( args [ 2 ], player )
 					else
 						player:Message ( "Failed to revoke admin rights from ".. args [ 2 ]:GetName ( ) .."!", "err" )
