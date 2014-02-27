@@ -311,8 +311,8 @@ function Admin:__init ( )
 
 	-- Normal events
 	Events:Subscribe ( "KeyUp", self, self.onKeyPress )
-	Events:Subscribe ( "PlayerJoin", self.onPlayerJoin )
-	Events:Subscribe ( "PlayerQuit", self.onPlayerQuit )
+	Events:Subscribe ( "PlayerJoin", self, self.onPlayerJoin )
+	Events:Subscribe ( "PlayerQuit", self, self.onPlayerQuit )
 	Events:Subscribe ( "LocalPlayerInput", self, self.disableControls )
 	-- Network events
 	Network:Send ( "admin.requestPermissions" )
