@@ -213,7 +213,7 @@ function Admin:__init ( )
 	self.warpPanel.warp = GUI:Button ( "Warp", Vector2 ( 0.0, 0.37 ), Vector2 ( 0.19, 0.035 ), self.warpPanel.window )
 	self.warpPanel.warp:Subscribe ( "Press", self, self.warpPlayerTo )
 
-	self.panel.bansList = GUI:SortedList ( Vector2 ( 0.0, 0.0 ), Vector2 ( 0.16, 0.66 ), self.panel.bansTab, { { name = "Steam ID" } } )
+	self.panel.bansList = GUI:SortedList ( Vector2 ( 0.0, 0.0 ), Vector2 ( 0.16, 0.66 ), self.panel.bansTab, { { name = "Ban" } } )
 	self.panel.bansList:Subscribe ( "RowSelected", self, self.getBanInformation )
 	self.panel.bansSearch = GUI:TextBox ( "", Vector2 ( 0.0, 0.67 ), Vector2 ( 0.16, 0.035 ), "text", self.panel.bansTab )
 	self.panel.bansSearch:Subscribe ( "TextChanged", self, self.searchBan )
@@ -384,7 +384,7 @@ end
 function Admin:addPlayerToList ( player )
 	local item = self.panel.playersList:AddItem ( player:GetName ( ) )
 	item:SetDataObject ( "id", player )
-	self.players [ player:GetSteamId ( ) ] = item
+	self.players [ tostring ( player:GetSteamId ( ) ) ] = item
 end
 
 function Admin:loadPlayersToList ( )
@@ -433,9 +433,10 @@ function Admin:onPlayerJoin ( args )
 end
 
 function Admin:onPlayerQuit ( args )
-	if ( self.players [ args.player:GetSteamId ( ) ] ) then
-		self.panel.playersList:RemoveItem ( self.players [ args.player:GetSteamId ( ) ] )
-		self.players [ args.player:GetSteamId ( ) ] = nil
+	local steamID = tostring ( args.player:GetSteamId ( ) )
+	if ( self.players [ steamID ] ) then
+		self.panel.playersList:RemoveItem ( self.players [ steamID ] )
+		self.players [ steamID ] = nil
 	end
 end
 
@@ -462,7 +463,7 @@ end
 
 function Admin:updateData ( )
 	if self:isActive ( ) then
-		 if ( self.serverUpdateTimer:GetSeconds ( ) >= 10 ) then
+		if ( self.serverUpdateTimer:GetSeconds ( ) >= 10 ) then
 			Network:Send ( "admin.getServerInfo" )
 			self.serverUpdateTimer:Restart ( )
 		end
@@ -873,7 +874,7 @@ function Admin:displayBans ( bans )
 	self.banData = { }
 	if ( bans ) then
 		for _, ban in ipairs ( bans ) do
-			local item = self.panel.bansList:AddItem ( ban.steamID )
+			local item = self.panel.bansList:AddItem ( ( ban.name == "" and ban.steamID or ban.name .."(".. tostring ( ban.steamID ) ..")" ) )
 			item:SetDataString ( "id", ban.steamID )
 			self.banData [ ban.steamID ] = ban
 			self.bans [ ban.steamID ] = item
