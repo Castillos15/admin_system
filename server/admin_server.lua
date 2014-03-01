@@ -446,6 +446,9 @@ function Admin:executeAction ( args, player )
 							}
 						)
 						if ( vehicle ) then
+							vehicle:SetUnoccupiedRespawnTime ( nil )
+							vehicle:SetDeathRemove ( true )
+							vehicle:SetUnoccupiedRemove ( false )
 							args [ 2 ]:EnterVehicle ( vehicle, VehicleSeat.Driver )
 							self.vehicles [ vehicle ] = vehicle
 							player:Message ( "You gave ".. args [ 2 ]:GetName ( ) .." a ".. tostring ( Vehicle.GetNameByModelId ( args [ 3 ] ) ), "info" )
