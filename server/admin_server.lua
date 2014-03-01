@@ -556,7 +556,7 @@ function Admin:executeAction ( args, player )
 				end
 			elseif ( args [ 1 ] == "general.settime" ) then
 				if tonumber ( args [ 2 ] ) then
-					DefaultWorld:SetTime ( args [ 2 ] )
+					DefaultWorld:SetTime ( tonumber ( args [ 2 ] ) )
 					player:Message ( "Game time successfully changed.", "info" )
 				else
 					player:Message ( "Invalid value.", "err" )
@@ -564,13 +564,13 @@ function Admin:executeAction ( args, player )
 			elseif ( args [ 1 ] == "general.settimestep" ) then
 				if tonumber ( args [ 2 ] ) then
 					player:Message ( "Game time step successfully changed.", "info" )
-					DefaultWorld:SetTimeStep ( args [ 2 ] )
+					DefaultWorld:SetTimeStep ( tonumber ( args [ 2 ] ) )
 				else
 					player:Message ( "Invalid value.", "err" )
 				end
 			elseif ( args [ 1 ] == "general.setweather" ) then
 				if tonumber ( args [ 2 ] ) then
-					DefaultWorld:SetWeatherSeverity ( args [ 2 ] )
+					DefaultWorld:SetWeatherSeverity ( tonumber ( args [ 2 ] ) )
 					player:Message ( "Game weather successfully changed.", "info" )
 				else
 					player:Message ( "Invalid value.", "err" )
