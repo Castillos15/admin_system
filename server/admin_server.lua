@@ -153,10 +153,9 @@ function Admin:__init ( )
 	for _, perm in ipairs ( self.permissions ) do
 		permissions [ perm ] = true
 	end
-	if ACL:createGroup ( "Admin", permissions, false, "Admin", { 255, 0, 0 } ) then
-		if ( firstAdmin and firstAdmin ~= "" ) then
-			ACL:groupAddObject ( "Admin", firstAdmin )
-		end
+	ACL:createGroup ( "Admin", permissions, false, "Admin", { 255, 0, 0 } )
+	if ( firstAdmin and firstAdmin ~= "Your Steam ID Here" ) then
+		ACL:groupAddObject ( "Admin", firstAdmin )
 	end
 
 	-- Adds the players with the permission to use the admin chat to a table.
