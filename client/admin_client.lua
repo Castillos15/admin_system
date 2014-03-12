@@ -19,6 +19,7 @@ function Admin:__init ( )
 	self.permPanelChange = { }
 	self.aclCreatePanel = { }
 	self.aclObjectPanel = { }
+	self.vehColorPanel = { }
 	self.players = { }
 	self.warpPlayers = { }
 	self.serverInfo = { }
@@ -42,6 +43,7 @@ function Admin:__init ( )
 	self.permissionSelected = { }
 	self.permissionItems = { }
 	self.templateItems = { }
+	self.modules = { }
 	self.active = false
 	self.playerUpdateTimer = Timer ( )
 	self.serverUpdateTimer = Timer ( )
@@ -61,7 +63,7 @@ function Admin:__init ( )
 	end
 	table.sort ( self.vehicleList, function ( a, b ) return ( a < b ) end )
 
-	self.panel.window = GUI:Window ( "Admin Panel by Castillo v0.1", Vector2 ( 0.2, 0.5 ), Vector2 ( 0.5, 0.8 ) )
+	self.panel.window = GUI:Window ( "Admin Panel by Castillo v0.2", Vector2 ( 0.2, 0.5 ), Vector2 ( 0.5, 0.8 ) )
 	self.panel.window:Subscribe ( "WindowClosed", self, self.onPanelClose )
 	self.panel.window:SetVisible ( false )
 	GUI:Center ( self.panel.window )
@@ -134,8 +136,10 @@ function Admin:__init ( )
 	self.panel.giveVehicle:Subscribe ( "Press", self, self.giveVehicle )
 	self.panel.destroyVehicle = GUI:Button ( "Destroy", Vector2 ( 0.423, 0.44 ), Vector2 ( 0.06, 0.03 ), self.panel.playersTab, "player.destroyvehicle" )
 	self.panel.destroyVehicle:Subscribe ( "Press", self, self.destroyVehicle )
-	self.panel.repairVehicle = GUI:Button ( "Repair", Vector2 ( 0.36, 0.48 ), Vector2 ( 0.123, 0.03 ), self.panel.playersTab, "player.repairvehicle" )
+	self.panel.repairVehicle = GUI:Button ( "Repair", Vector2 ( 0.36, 0.48 ), Vector2 ( 0.06, 0.03 ), self.panel.playersTab, "player.repairvehicle" )
 	self.panel.repairVehicle:Subscribe ( "Press", self, self.repairVehicle )
+	self.panel.setVehicleColour = GUI:Button ( "Set colour", Vector2 ( 0.423, 0.48 ), Vector2 ( 0.06, 0.03 ), self.panel.playersTab, "player.setvehiclecolour" )
+	self.panel.setVehicleColour:Subscribe ( "Press", self, self.showVehicleColourSelector )
 	self.panel.weaponMenu = GUI:ComboBox ( Vector2 ( 0.36, 0.53 ), Vector2 ( 0.123, 0.03 ), self.panel.playersTab, getWeaponNames ( ) )
 	self.panel.weaponSlotMenu = GUI:ComboBox ( Vector2 ( 0.36, 0.57 ), Vector2 ( 0.06, 0.03 ), self.panel.playersTab, { "Primary", "Left", "Right" } )
 	self.panel.giveWeapon = GUI:Button ( "Give", Vector2 ( 0.423, 0.57 ), Vector2 ( 0.06, 0.03 ), self.panel.playersTab, "player.giveweapon" )
@@ -309,6 +313,34 @@ function Admin:__init ( )
 	self.aclObjectPanel.add = GUI:Button ( "Add", Vector2 ( 0.0, 0.07 ), Vector2 ( 0.14, 0.03 ), self.aclObjectPanel.window )
 	self.aclObjectPanel.add:Subscribe ( "Press", self, self.addACLObject )
 
+	self.panel.modulesList = GUI:SortedList ( Vector2 ( 0.0, 0.0 ), Vector2 ( 0.16, 0.66 ), self.panel.modulesTab, { { name = "Module" } } )
+	self.panel.modulesSearch = GUI:TextBox ( "", Vector2 ( 0.0, 0.67 ), Vector2 ( 0.16, 0.035 ), "text", self.panel.modulesTab )
+	self.panel.modulesSearch:Subscribe ( "TextChanged", self, self.searchModule )
+	GUI:Label ( "Module log:", Vector2 ( 0.165, 0.01 ), Vector2 ( 0.2, 0.1 ), self.panel.modulesTab ):SetTextColor ( Color ( 255, 0, 0 ) )
+	self.panel.modulesLogScroll = GUI:ScrollControl ( Vector2 ( 0.17, 0.04 ), Vector2 ( 0.34, 0.5 ), self.panel.modulesTab )
+	self.panel.modulesLog = GUI:Label ( "", Vector2 ( 0.0, 0.0 ), Vector2 ( 0.34, 0.5 ), self.panel.modulesLogScroll )
+	self.panel.modulesLog:SetWrap ( true )
+	self.panel.moduleLoad = GUI:Button ( "Load", Vector2 ( 0.17, 0.67 ), Vector2 ( 0.07, 0.035 ), self.panel.modulesTab, "module.load" )
+	self.panel.moduleLoad:Subscribe ( "Press", self, self.loadModule )
+	self.panel.moduleReload = GUI:Button ( "Reload", Vector2 ( 0.25, 0.67 ), Vector2 ( 0.07, 0.035 ), self.panel.modulesTab, "module.unload" )
+	self.panel.moduleReload:Subscribe ( "Press", self, self.reloadModule )
+	self.panel.moduleUnload = GUI:Button ( "Unload", Vector2 ( 0.33, 0.67 ), Vector2 ( 0.07, 0.035 ), self.panel.modulesTab )
+	self.panel.moduleUnload:Subscribe ( "Press", self, self.unloadModule )
+	self.panel.modulesRefresh = GUI:Button ( "Refresh", Vector2 ( 0.41, 0.67 ), Vector2 ( 0.07, 0.035 ), self.panel.modulesTab )
+	self.panel.modulesRefresh:Subscribe ( "Press", self, self.refreshModules )
+
+	self.vehColorPanel.window = GUI:Window ( "Vehicle Colour", Vector2 ( 0.0, 0.0 ), Vector2 ( 0.3, 0.36 ) )
+	GUI:Center ( self.vehColorPanel.window )
+	self.vehColorPanel.window:SetVisible ( false )
+	self.vehColorPanel.tabPanel, self.vehColorPanel.tabs = GUI:TabControl ( { "Tone 1", "Tone 2" }, Vector2 ( 0.0, 0.0 ), Vector2 ( 0.0, 0.0 ), self.vehColorPanel.window )
+	self.vehColorPanel.tabPanel:SetDock ( GwenPosition.Fill )
+	self.vehColorPanel.tone1 = GUI:ColorPicker ( true, Vector2 ( 0.0, 0.0 ), Vector2 ( 0.3, 0.23 ), self.vehColorPanel.tabs [ "tone 1" ].base )
+	self.vehColorPanel.tone1Set = GUI:Button ( "Set colour", Vector2 ( 0.0, 0.24 ), Vector2 ( 0.282, 0.03 ), self.vehColorPanel.tabs [ "tone 1" ].base )
+	self.vehColorPanel.tone1Set:Subscribe ( "Press", self, self.setVehicleTone1Colour )
+	self.vehColorPanel.tone2 = GUI:ColorPicker ( true, Vector2 ( 0.0, 0.0 ), Vector2 ( 0.3, 0.23 ), self.vehColorPanel.tabs [ "tone 2" ].base )
+	self.vehColorPanel.tone2Set = GUI:Button ( "Set colour", Vector2 ( 0.0, 0.24 ), Vector2 ( 0.282, 0.03 ), self.vehColorPanel.tabs [ "tone 2" ].base )
+	self.vehColorPanel.tone2Set:Subscribe ( "Press", self, self.setVehicleTone2Colour )
+
 	-- Normal events
 	Events:Subscribe ( "KeyUp", self, self.onKeyPress )
 	Events:Subscribe ( "PlayerJoin", self, self.onPlayerJoin )
@@ -324,6 +356,7 @@ function Admin:__init ( )
 	Network:Subscribe ( "admin.shout", self, self.shout )
 	Network:Subscribe ( "admin.addChatMessage", self, self.addChatMessage )
 	Network:Subscribe ( "admin.displayACL", self, self.displayACL )
+	Network:Subscribe ( "admin.displayModules", self, self.displayModules )
 end
 
 function Admin:isActive ( )
@@ -368,10 +401,13 @@ function Admin:showPanel ( data )
 	Network:Send ( "admin.getServerInfo" )
 	self:displayBans ( data.bans )
 	self:displayACL ( data.acl )
+	self:displayModules ( data.modules )
 	for _, guiElement in ipairs ( GUI:GetAllProtected ( ) ) do
 		local id = guiElement:GetDataString ( "id" )
 		if ( id ) then
-			guiElement:SetEnabled ( self.permissions [ id ] )
+			if ( self.permissions [ id ] ~= nil ) then
+				guiElement:SetEnabled ( self.permissions [ id ] )
+			end
 		end
 	end
 end
@@ -788,6 +824,50 @@ function Admin:repairVehicle ( )
 	end
 end
 
+function Admin:showVehicleColourSelector ( )
+	local player = self:getListSelectedPlayer ( self.panel.playersList )
+	if ( player ) then
+		if player:InVehicle ( ) then
+			self.vehColorPanel.window:SetVisible ( true )
+			self.victim = player
+		else
+			self:Message ( "This player is not in a vehicle.", "err" )
+		end
+	else
+		self:Message ( "No player selected.", "err" )
+	end
+end
+
+function Admin:setVehicleTone1Colour ( )
+	if IsValid ( self.victim ) then
+		if self.victim:InVehicle ( ) then
+			local color = self.vehColorPanel.tone1:GetColor ( )
+			Network:Send ( "admin.executeAction", { "player.setvehiclecolour", self.victim, "tone1", color } )
+			self.vehColorPanel.window:SetVisible ( false )
+			self.victim = nil
+		else
+			self:Message ( "This player is not in a vehicle.", "err" )
+		end
+	else
+		self:Message ( "No player selected.", "err" )
+	end
+end
+
+function Admin:setVehicleTone2Colour ( )
+	if IsValid ( self.victim ) then
+		if self.victim:InVehicle ( ) then
+			local color = self.vehColorPanel.tone2:GetColor ( )
+			Network:Send ( "admin.executeAction", { "player.setvehiclecolour", self.victim, "tone2", color } )
+			self.vehColorPanel.window:SetVisible ( false )
+			self.victim = nil
+		else
+			self:Message ( "This player is not in a vehicle.", "err" )
+		end
+	else
+		self:Message ( "No player selected.", "err" )
+	end
+end
+
 function Admin:giveWeapon ( )
 	local player = self:getListSelectedPlayer ( self.panel.playersList )
 	if ( player ) then
@@ -1030,6 +1110,7 @@ function Admin:displayACL ( acl )
 				local node = permNode:AddNode ( tostring ( perm ) )
 				node:SetDataString ( "value", tostring ( group.permissions [ perm ] ) )
 				node:Subscribe ( "Select", self, self.onACLRightClick )
+				node:GetLabel ( ):SetTextNormalColor ( ( group.permissions [ perm ] and Color ( 0, 255, 0 ) or Color ( 255, 0, 0 ) ) )
 				--node:SetToolTip ( "Value: ".. tostring ( group.permissions [ perm ] ) )
 			end
 			local objNode = node:AddNode ( "Objects" )
@@ -1163,6 +1244,85 @@ function Admin:removeACLObject ( )
 	end
 end
 
+function Admin:displayModules ( modules )
+	self.panel.modulesList:Clear ( )
+	self.modules = { }
+	if ( modules ) then
+		for name, state in pairs ( modules [ 1 ] ) do
+			local item = self.panel.modulesList:AddItem ( tostring ( name ) )
+			item:SetTextColor ( ( state and Color ( 0, 255, 0 ) or Color ( 255, 0, 0 ) ) )
+			self.modules [ name ] = item
+		end
+
+		self.panel.modulesLog:SetText ( "" )
+		for index, log_ in ipairs ( modules [ 2 ] ) do
+			if ( index == 1 ) then
+				self.panel.modulesLog:SetText ( modules [ 2 ] [ 1 ] )
+			else
+				self.panel.modulesLog:SetText ( self.panel.modulesLog:GetText ( ) .."\n".. tostring ( log_ ) )
+			end
+		end
+		self.panel.modulesLog:SizeToContents ( )
+		self.panel.modulesLog:SetWrap ( true )
+	end
+end
+
+function Admin:searchModule ( )
+	local text = self.panel.modulesSearch:GetText ( ):lower ( )
+	if ( text:len ( ) > 0 ) then
+		for _, item in pairs ( self.modules ) do
+			item:SetVisible ( false )
+			if item:GetCellText ( 0 ):lower ( ):find ( text, 1, true ) then
+				item:SetVisible ( true )
+			end
+		end
+	else
+		for _, item in pairs ( self.modules ) do
+			item:SetVisible ( true )
+		end
+	end
+end
+
+function Admin:loadModule ( )
+	local row = self.panel.modulesList:GetSelectedRow ( )
+	if ( row ) then
+		local name = row:GetCellText ( 0 )
+		if ( name ) then
+			Network:Send ( "admin.executeAction", { "module.load", name } )
+		end
+	else
+		self:Message ( "Please select a module.", "err" )
+	end
+end
+
+function Admin:reloadModule ( )
+	local row = self.panel.modulesList:GetSelectedRow ( )
+	if ( row ) then
+		local name = row:GetCellText ( 0 )
+		if ( name ) then
+			Network:Send ( "admin.executeAction", { "module.load", "module.reload", name } )
+		end
+	else
+		self:Message ( "Please select a module.", "err" )
+	end
+end
+
+function Admin:unloadModule ( )
+	local row = self.panel.modulesList:GetSelectedRow ( )
+	if ( row ) then
+		local name = row:GetCellText ( 0 )
+		if ( name ) then
+			Network:Send ( "admin.executeAction", { "module.unload", name } )
+		end
+	else
+		self:Message ( "Please select a module.", "err" )
+	end
+end
+
+function Admin:refreshModules ( )
+	Network:Send ( "admin.getModules" )
+end
+
 function Admin:Message ( msg, color )
 	Chat:Print ( msg, msgColors [ color ] )
 end
@@ -1206,13 +1366,14 @@ Events:Subscribe ( "ModuleLoad",
 					Spectating players: Not tested yet, but should work.
 					Setting health/model/money
 					Warp to players/warp player to another player
-					Give/destroy/repair vehicles
+					Give/destroy/repair vehicles/set colour
 					Give weapons to specified slot
 					Shout to players: Displays a message on the center of the screen of the player selected.
 					Killing players
 					Setting game time/weather severity/time step
 					Displaying some of the server config settings ( name, players/max players, etc )
 					Admin chat
+					Module management ( load/reload/unload modules )
 
 					Commands:
 
@@ -1237,6 +1398,9 @@ Events:Subscribe ( "ModuleLoad",
 					/settime <value: 0-23> -> Sets the default world time to the specified value.
 					/settimestep <value> -> Sets the default world time step to the specified value.
 					/setweather <value: 0-2> -> Sets the default world weather severity to the specified value.
+					/loadmodule <name> -> Loads a module.
+					/reloadmodule <name> -> Reloads a module.
+					/unloadmodule <name> -> Unloads a module.
 
 					Toggle key: P
 				]]
