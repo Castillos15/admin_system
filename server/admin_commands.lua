@@ -24,7 +24,10 @@ function Commands:__init ( )
 			[ "shout" ] = { action = "player.shout", args = "p,s-" },
 			[ "settime" ] = { action = "general.settime", args = "i" },
 			[ "settimestep" ] = { action = "general.settimestep", args = "i" },
-			[ "setweather" ] = { action = "general.setweather", args = "i" }
+			[ "setweather" ] = { action = "general.setweather", args = "i" },
+			[ "loadmodule" ] = { action = "module.load", args = "s" },
+			[ "unloadmodule" ] = { action = "module.unload", args = "s" },
+			[ "reloadmodule" ] = { action = "module.load", subAction = "module.reload", args = "s" }
 		}
 
 	Events:Subscribe ( "PlayerChat", self, self.onPlayerChat )
@@ -45,6 +48,9 @@ function Commands:onPlayerChat ( args )
 	if ( cmd ) then
 		local arguments = { }
 		arguments [ 1 ] = cmd.action
+		if ( cmd.subAction ) then
+			arguments [ 2 ] = cmd.subAction
+		end
 		local commandArgs = cmd.args:split ( "," )
 		if ( type ( commandArgs ) ~= "table" ) then
 			commandArgs = { cmd.args }
