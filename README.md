@@ -16,7 +16,7 @@ Setting health/model/money
 
 Warp to players/warp player to another player
 
-Give/destroy/repair vehicles
+Give/destroy/repair vehicles/set colours
 
 Give weapons to specified slot
 
@@ -28,6 +28,8 @@ Setting game time/weather severity/time step
 Displaying some of the server config settings ( name, players/max players, etc )
 
 Admin chat
+
+Module management ( load/reload/unload modules )
 
 Commands:
 
@@ -73,6 +75,12 @@ Commands:
 
 /setweather <value: 0-2> -> Sets the default world weather severity to the specified value.
 
+/loadmodule <name> -> Loads a module.
+
+/reloadmodule <name> -> Reloads a module.
+
+/unloadmodule <name> -> Unloads a module.
+
 
 Players tab: http://cubeupload.com/im/fr6I9D.jpg, http://cubeupload.com/im/7XpAtN.jpg
 
@@ -82,7 +90,9 @@ Server tab: http://cubeupload.com/im/ULaIR7.jpg
 
 Admin chat tab: http://cubeupload.com/im/bvRXoM.jpg
 
-ACL tab: http://cubeupload.com/im/0OoEvo.jpg, http://cubeupload.com/im/mVcT11.jpg
+ACL tab: http://cubeupload.com/im/QfXxPK.jpg
+
+Modules tab: http://cubeupload.com/im/mMJDTw.jpg
 
 Toggle key: P
 
