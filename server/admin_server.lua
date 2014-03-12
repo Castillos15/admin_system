@@ -29,6 +29,7 @@ function Admin:__init ( )
 			"player.givevehicle",
 			"player.repairvehicle",
 			"player.destroyvehicle",
+			"player.setvehiclecolour",
 			"player.shout",
 			"general.adminpanel",
 			"general.tab_players",
@@ -145,6 +146,7 @@ function Admin:__init ( )
 		}
 	self.vehicles = { }
 	self.canChat = { }
+	self.moduleLog = { }
 
 	json = require "JSON"
 
@@ -156,6 +158,15 @@ function Admin:__init ( )
 	ACL:createGroup ( "Admin", permissions, false, "Admin", { 255, 0, 0 } )
 	if ( firstAdmin and firstAdmin ~= "Your Steam ID Here" ) then
 		ACL:groupAddObject ( "Admin", firstAdmin )
+	end
+
+	for group, data in pairs ( ACL:groupList ( true ) ) do
+		local perms = data.permissions
+		for _, perm in ipairs ( self.permissions ) do
+			if ( perms [ perm ] == nil ) then
+				ACL:updateGroupPermission ( group, perm, false )
+			end
+		end
 	end
 
 	-- Adds the players with the permission to use the admin chat to a table.
@@ -173,6 +184,7 @@ function Admin:__init ( )
 	Network:Subscribe ( "admin.isAdmin", self, self.checkIfIsAdmin )
 	Network:Subscribe ( "admin.executeAction", self, self.executeAction )
 	Network:Subscribe ( "admin.getBans", self, self.getBans )
+	Network:Subscribe ( "admin.getModules", self, self.getModules )
 	-- Normal events
 	Events:Subscribe ( "ModuleUnload", self, self.onModuleUnload )
 	Events:Subscribe ( "PlayerJoin", self, self.onPlayerJoin )
@@ -209,7 +221,7 @@ end
 function Admin:checkIfIsAdmin ( _, player )
 	if IsValid ( player ) then
 		if ACL:hasObjectPermissionTo ( tostring ( player:GetSteamId ( ) ), "general.adminpanel" ) then
-			Network:Send ( player, "admin.showPanel", { bans = banSystem:getBans ( ), acl = ACL:groupList ( ) } )
+			Network:Send ( player, "admin.showPanel", { bans = banSystem:getBans ( ), acl = ACL:groupList ( ), modules = { Server:GetModules ( ), self.moduleLog } } )
 		end
 	end
 end
@@ -487,6 +499,26 @@ function Admin:executeAction ( args, player )
 				else
 					player:Message ( "Player is offline.", "err" )
 				end
+			elseif ( args [ 1 ] == "player.setvehiclecolour" ) then
+				if IsValid ( args [ 2 ] ) then
+					if args [ 2 ]:InVehicle ( ) then
+						local veh = args [ 2 ]:GetVehicle ( )
+						if ( veh ) then
+							local color1, color2 = veh:GetColors ( )
+							if ( args [ 3 ] == "tone1" ) then
+								veh:SetColors ( args [ 4 ], color2 )
+							elseif ( args [ 3 ] == "tone2" ) then
+								veh:SetColors ( color1, args [ 4 ] )
+							end
+							player:Message ( "You changed ".. args [ 2 ]:GetName ( ) .."'s vehicle colour!", "info" )
+							player:Message ( player:GetName ( ) .." has changed your vehicle colour!", "info" )
+						end
+					else
+						player:Message ( args [ 2 ]:GetName ( ) .." is not in a vehicle.", "err" )
+					end
+				else
+					player:Message ( "Player is offline.", "err" )
+				end
 			elseif ( args [ 1 ] == "player.giveweapon" ) then
 				if IsValid ( args [ 2 ] ) then
 					args [ 2 ]:GiveWeapon ( WeaponSlot [ args [ 4 ] ], Weapon ( args [ 3 ], 30, 70 ) )
@@ -650,6 +682,35 @@ function Admin:executeAction ( args, player )
 				else
 					player:Message ( "No group name was given.", "err" )
 				end
+			elseif ( args [ 1 ] == "module.load" ) then
+				if ( args [ 2 ] == "module.reload" ) then
+					if self:moduleExists ( tostring ( args [ 3 ] ) ) then
+						Console:Run ( "reload ".. tostring ( args [ 3 ] ) )
+						player:Message ( "You have successfully reloaded the module ".. tostring ( args [ 3 ] ) ..".", "info" )
+						self:updateModuleLog ( args [ 3 ], player, "reloaded" )
+						self:getModules ( nil, player )
+					else
+						player:Message ( "No module found with that name.", "err" )
+					end
+				else
+					if self:moduleExists ( tostring ( args [ 2 ] ) ) then
+						Console:Run ( "load ".. tostring ( args [ 2 ] ) )
+						player:Message ( "You have successfully loaded the module ".. tostring ( args [ 2 ] ) ..".", "info" )
+						self:updateModuleLog ( args [ 2 ], player, "loaded" )
+						self:getModules ( nil, player )
+					else
+						player:Message ( "No module found with that name.", "err" )
+					end
+				end
+			elseif ( args [ 1 ] == "module.unload" ) then
+				if self:moduleExists ( tostring ( args [ 2 ] ) ) then
+					Console:Run ( "unload ".. tostring ( args [ 2 ] ) )
+					player:Message ( "You have successfully unloaded the module ".. tostring ( args [ 2 ] ) ..".", "err" )
+					self:updateModuleLog ( args [ 2 ], player, "unloaded" )
+					self:getModules ( nil, player )
+				else
+					player:Message ( "No module found with that name.", "err" )
+				end
 			end
 		else
 			player:Message ( "You don't have access to this function.", "err" )
@@ -666,6 +727,27 @@ end
 function Admin:getACL ( _, player )
 	if IsValid ( player ) then
 		Network:Send ( player, "admin.displayACL", ACL:groupList ( ) )
+	end
+end
+
+function Admin:getModules ( _, player )
+	if IsValid ( player ) then
+		Network:Send ( player, "admin.displayModules", { Server:GetModules ( ), self.moduleLog } )
+	end
+end
+
+function Admin:updateModuleLog ( module, player, action )
+	if IsValid ( player ) then
+		table.insert ( self.moduleLog, os.date ( "%X" ) ..": ".. player:GetName ( ) .."(".. tostring ( player:GetSteamId ( ) ) ..") ".. tostring ( action ) .." the module ".. tostring ( module ) )
+	end
+end
+
+function Admin:moduleExists ( module )
+	local modules = Server:GetModules ( )
+	if ( modules [ module ] ~= nil ) then
+		return true
+	else
+		return false
 	end
 end
 
