@@ -131,27 +131,31 @@ function ACL:groupListObjects ( name )
 	end
 end
 
-function ACL:groupList ( )
+function ACL:groupList ( all )
 	local groups = { }
-	for name, data in pairs ( self.groups ) do
-		table.insert (
-			groups,
-			{
-				name = name,
-				creator = data.creator,
-				permissions = data.permissions,
-				creationDate = data.creationDate,
-				objects = { }
-			}
-		)
-		local index = #groups
-		local query = SQL:Query ( "SELECT * FROM acl_members WHERE groups LIKE '%".. tostring ( name ) .."%'" )
-		local result = query:Execute ( )
-		if ( #result > 0 ) then
-			for _, result in ipairs ( result ) do
-				table.insert ( groups [ index ].objects, result.steamID )
+	if ( not all ) then
+		for name, data in pairs ( self.groups ) do
+			table.insert (
+				groups,
+				{
+					name = name,
+					creator = data.creator,
+					permissions = data.permissions,
+					creationDate = data.creationDate,
+					objects = { }
+				}
+			)
+			local index = #groups
+			local query = SQL:Query ( "SELECT * FROM acl_members WHERE groups LIKE '%".. tostring ( name ) .."%'" )
+			local result = query:Execute ( )
+			if ( #result > 0 ) then
+				for _, result in ipairs ( result ) do
+					table.insert ( groups [ index ].objects, result.steamID )
+				end
 			end
 		end
+	else
+		groups = self.groups
 	end
 
 	return groups
