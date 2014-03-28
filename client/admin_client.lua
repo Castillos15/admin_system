@@ -435,7 +435,7 @@ function Admin:getInformation ( )
 	local row = self.panel.playersList:GetSelectedRow ( )
 	if ( row ) then
 		local player = row:GetDataObject ( "id" )
-		if IsValid ( player ) then
+		if IsValid ( player, false ) then
 			Network:Send ( "admin.requestInformation", player )
 		end
 	end
@@ -541,7 +541,7 @@ function Admin:showBanWindow ( )
 end
 
 function Admin:banPlayer ( )
-	if IsValid ( self.victim ) then
+	if IsValid ( self.victim, false ) then
 		local reason = ( self.banPanel.reasonCheck:GetChecked ( ) == true and self.banPanel.reasonEdit:GetText ( ) or self.banPanel.reasonsBox:GetSelectedItem ( ):GetText ( ) )
 		local durationMethod = self.banPanel.durationBox:GetSelectedItem ( ):GetText ( )
 		local duration = tonumber ( self.banPanel.duration:GetText ( ) )
@@ -575,7 +575,7 @@ function Admin:showKickWindow ( )
 end
 
 function Admin:kickPlayer ( )
-	if IsValid ( self.victim ) then
+	if IsValid ( self.victim, false ) then
 		local reason = ( self.kickPanel.reasonCheck:GetChecked ( ) == true and self.kickPanel.reasonEdit:GetText ( ) or self.kickPanel.reasonsBox:GetSelectedItem ( ):GetText ( ) )
 		Network:Send ( "admin.executeAction", { "player.kick", self.victim, reason } )
 		self.victim = false
@@ -600,7 +600,7 @@ function Admin:showMuteWindow ( )
 end
 
 function Admin:mutePlayer ( )
-	if IsValid ( self.victim ) then
+	if IsValid ( self.victim, false ) then
 		local reason = ( self.mutePanel.reasonCheck:GetChecked ( ) == true and self.mutePanel.reasonEdit:GetText ( ) or self.mutePanel.reasonsBox:GetSelectedItem ( ):GetText ( ) )
 		local durationMethod = self.mutePanel.durationBox:GetSelectedItem ( ):GetText ( )
 		local duration = tonumber ( self.mutePanel.duration:GetText ( ) )
@@ -711,7 +711,7 @@ function Admin:showWarpWindow ( )
 end
 
 function Admin:warpPlayerTo ( )
-	if IsValid ( self.victim ) then
+	if IsValid ( self.victim, false ) then
 		local player = self:getListSelectedPlayer ( self.warpPanel.list )
 		if ( player ) then
 			Network:Send ( "admin.executeAction", { "player.warpto", self.victim, player } )
@@ -757,7 +757,7 @@ function Admin:spectate ( )
 end
 
 function Admin:spectateCamera ( )
-	if IsValid ( self.victim ) then
+	if IsValid ( self.victim, false ) then
 		local position = self.victim:GetPosition ( )
 		local angle = self.victim:GetAngle ( )
 		Camera:SetPosition ( position + angle * Vector3 ( 0, 2.5, 10 ) )
@@ -839,7 +839,7 @@ function Admin:showVehicleColourSelector ( )
 end
 
 function Admin:setVehicleTone1Colour ( )
-	if IsValid ( self.victim ) then
+	if IsValid ( self.victim, false ) then
 		if self.victim:InVehicle ( ) then
 			local color = self.vehColorPanel.tone1:GetColor ( )
 			Network:Send ( "admin.executeAction", { "player.setvehiclecolour", self.victim, "tone1", color } )
@@ -854,7 +854,7 @@ function Admin:setVehicleTone1Colour ( )
 end
 
 function Admin:setVehicleTone2Colour ( )
-	if IsValid ( self.victim ) then
+	if IsValid ( self.victim, false ) then
 		if self.victim:InVehicle ( ) then
 			local color = self.vehColorPanel.tone2:GetColor ( )
 			Network:Send ( "admin.executeAction", { "player.setvehiclecolour", self.victim, "tone2", color } )
@@ -905,7 +905,7 @@ function Admin:showShoutWindow ( )
 end
 
 function Admin:shoutPlayer ( )
-	if IsValid ( self.victim ) then
+	if IsValid ( self.victim, false ) then
 		local message = self.shoutPanel.message:GetText ( )
 		if ( message ~= "" ) then
 			Network:Send ( "admin.executeAction", { "player.shout", self.victim, message } )
