@@ -193,7 +193,7 @@ end
 
 function Admin:onModuleUnload ( )
 	for vehicle in pairs ( self.vehicles ) do
-		if IsValid ( vehicle ) then
+		if IsValid ( vehicle, false ) then
 			vehicle:Remove ( )
 		end
 	end
@@ -219,7 +219,7 @@ function Admin:requestPermissions ( _, player )
 end
 
 function Admin:checkIfIsAdmin ( _, player )
-	if IsValid ( player ) then
+	if IsValid ( player, false ) then
 		if ACL:hasObjectPermissionTo ( tostring ( player:GetSteamId ( ) ), "general.adminpanel" ) then
 			Network:Send ( player, "admin.showPanel", { bans = banSystem:getBans ( ), acl = ACL:groupList ( ), modules = { Server:GetModules ( ), self.moduleLog } } )
 		end
@@ -227,7 +227,7 @@ function Admin:checkIfIsAdmin ( _, player )
 end
 
 function Admin:getServerInfo ( _, player )
-	if IsValid ( player ) then
+	if IsValid ( player, false ) then
 		self.serverInfo.time = os.time ( )
 		self.serverInfo.serverTime = os.date ( "%X" )
 		self.serverInfo.weatherSeverity = DefaultWorld:GetWeatherSeverity ( )
@@ -237,7 +237,7 @@ function Admin:getServerInfo ( _, player )
 end
 
 function Admin:requestInformation ( player, admin )
-	if IsValid ( player ) then
+	if IsValid ( player, false ) then
 		local x, y, z = table.unpack ( tostring ( player:GetPosition ( ) ):split ( "," ) )
 		local ax, ay, az = table.unpack ( tostring ( player:GetAngle ( ) ):split ( "," ) )
 		local weapon = player:GetEquippedWeapon ( )
@@ -273,10 +273,10 @@ function Admin:requestInformation ( player, admin )
 end
 
 function Admin:executeAction ( args, player )
-	if IsValid ( player ) then
+	if IsValid ( player, false ) then
 		if ACL:hasObjectPermissionTo ( tostring ( player:GetSteamId ( ) ), args [ 1 ] ) then
 			if ( args [ 1 ] == "player.ban" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					local banArgs =
 					{
 						steamID = tostring ( args [ 2 ]:GetSteamId ( ) ),
@@ -293,7 +293,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.kick" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					local reason = tostring ( args [ 3 ] or "No reason defined" )
 					Chat:Broadcast ( args [ 2 ]:GetName ( ) .." was kicked by ".. player:GetName ( ) .." ( ".. reason .." )", Color ( 255, 0, 0 ) )
 					args [ 2 ]:Kick ( reason )
@@ -301,7 +301,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.mute" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					if mute:isPlayerMuted ( args [ 2 ] ) then
 						if mute:setPlayerMuted ( { steamID = tostring ( args [ 2 ]:GetSteamId ( ) ), player = args [ 2 ] }, false ) then
 							Chat:Broadcast ( args [ 2 ]:GetName ( ) .." was unmuted by ".. player:GetName ( ), Color ( 0, 255, 0 ) )
@@ -331,7 +331,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.freeze" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					if isPlayerFrozen ( args [ 2 ] ) then
 						setPlayerFrozen ( args [ 2 ], false )
 						player:Message ( "You have unfrozen ".. args [ 2 ]:GetName ( ), "info" )
@@ -346,7 +346,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.kill" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					args [ 2 ]:SetHealth ( 0 )
 					player:Message ( "You have killed ".. args [ 2 ]:GetName ( ), "err" )
 					args [ 2 ]:Message ( "You have been killed by ".. player:GetName ( ), "err" )		
@@ -354,7 +354,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.sethealth" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					local value = ( tonumber ( args [ 3 ] ) or 100 )
 					args [ 2 ]:SetHealth ( value / 100 )
 					player:Message ( "You have set ".. args [ 2 ]:GetName ( ) .."'s health to ".. tostring ( value ) .."%", "info" )
@@ -363,7 +363,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.setmodel" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					if ( self.validModels [ args [ 3 ] ] ) then
 						args [ 2 ]:SetModelId ( args [ 3 ] )
 						player:Message ( "You have set ".. args [ 2 ]:GetName ( ) .."'s model to ".. tostring ( args [ 3 ] ), "info" )
@@ -375,7 +375,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.setmoney" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					if tonumber ( args [ 3 ] ) then
 						args [ 2 ]:SetMoney ( tonumber ( args [ 3 ] ) )
 						player:Message ( "You have set ".. args [ 2 ]:GetName ( ) .."'s money to ".. tostring ( convertNumber ( args [ 3 ] ) ), "info" )
@@ -387,7 +387,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.givemoney" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					if tonumber ( args [ 3 ] ) then
 						args [ 2 ]:SetMoney ( tonumber ( args [ 3 ] ) + args [ 2 ]:GetMoney ( ) )
 						player:Message ( "You gave ".. args [ 2 ]:GetName ( ) .." $".. tostring ( convertNumber ( args [ 3 ] ) ), "info" )
@@ -399,7 +399,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.warp" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					local playerPos = args [ 2 ]:GetPosition ( )
 					player:SetPosition ( playerPos + Vector3 ( 2, 0, 0 ) )
 					player:Message ( "You warped to ".. args [ 2 ]:GetName ( ), "info" )
@@ -407,8 +407,8 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.warpto" ) then
-				if IsValid ( args [ 2 ] ) then
-					if IsValid ( args [ 3 ] ) then
+				if IsValid ( args [ 2 ], false ) then
+					if IsValid ( args [ 3 ], false ) then
 						local playerPos = args [ 2 ]:GetPosition ( )
 						args [ 3 ]:SetPosition ( playerPos + Vector3 ( 2, 0, 0 ) )
 						player:Message ( "You warped ".. args [ 2 ]:GetName ( ) .." to ".. args [ 3 ]:GetName ( ), "info" )
@@ -420,7 +420,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.givevehicle" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					if ( args [ 3 ] and Vehicle.GetNameByModelId ( args [ 3 ] ) ) then
 						if args [ 2 ]:InVehicle ( ) then
 							local veh = args [ 2 ]:GetVehicle ( )
@@ -474,7 +474,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.repairvehicle" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					if args [ 2 ]:InVehicle ( ) then
 						args [ 2 ]:GetVehicle ( ):SetHealth ( 1 )
 						player:Message ( "You repaired ".. args [ 2 ]:GetName ( ) .."'s vehicle", "info" )
@@ -486,7 +486,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.destroyvehicle" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					if args [ 2 ]:InVehicle ( ) then
 						local veh = args [ 2 ]:GetVehicle ( )
 						if ( veh ) then
@@ -500,7 +500,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.setvehiclecolour" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					if args [ 2 ]:InVehicle ( ) then
 						local veh = args [ 2 ]:GetVehicle ( )
 						if ( veh ) then
@@ -520,7 +520,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.giveweapon" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					args [ 2 ]:GiveWeapon ( WeaponSlot [ args [ 4 ] ], Weapon ( args [ 3 ], 30, 70 ) )
 					player:Message ( "You gave ".. args [ 2 ]:GetName ( ) .." the weapon: ".. tostring ( getWeaponNameFromID ( args [ 3 ] ) ) ..", ammo: 30 in clip, 70 maganize.", "info" )
 					args [ 2 ]:Message ( player:GetName ( ) .." has given you the weapon: ".. tostring ( getWeaponNameFromID ( args [ 3 ] ) ) ..", ammo: 30 in clip, 70 maganize.", "info" )
@@ -528,7 +528,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.giveadmin" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					if ACL:groupAddObject ( "Admin", tostring ( args [ 2 ]:GetSteamId ( ) ) ) then
 						player:Message ( "You gave admin rights to ".. args [ 2 ]:GetName ( ) .."!", "info" )
 						args [ 2 ]:Message ( player:GetName ( ) .." has given you admin rights!", "info" )
@@ -540,7 +540,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.takeadmin" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					if ACL:groupRemoveObject ( "Admin", tostring ( args [ 2 ]:GetSteamId ( ) ) ) then
 						player:Message ( "You revoked ".. args [ 2 ]:GetName ( ) .."'s admin rights!", "err" )
 						args [ 2 ]:Message ( player:GetName ( ) .." has revoked your admin rights!", "err" )
@@ -552,7 +552,7 @@ function Admin:executeAction ( args, player )
 					player:Message ( "Player is offline.", "err" )
 				end
 			elseif ( args [ 1 ] == "player.shout" ) then
-				if IsValid ( args [ 2 ] ) then
+				if IsValid ( args [ 2 ], false ) then
 					Network:Send ( args [ 2 ], "admin.shout", { name = "(".. player:GetName ( ) ..")", msg = tostring ( args [ 3 ] or "" ) } )
 				else
 					player:Message ( "Player is offline.", "err" )
@@ -719,25 +719,25 @@ function Admin:executeAction ( args, player )
 end
 
 function Admin:getBans ( _, player )
-	if IsValid ( player ) then
+	if IsValid ( player, false ) then
 		Network:Send ( player, "admin.displayBans", banSystem:getBans ( ) )
 	end
 end
 
 function Admin:getACL ( _, player )
-	if IsValid ( player ) then
+	if IsValid ( player, false ) then
 		Network:Send ( player, "admin.displayACL", ACL:groupList ( ) )
 	end
 end
 
 function Admin:getModules ( _, player )
-	if IsValid ( player ) then
+	if IsValid ( player, false ) then
 		Network:Send ( player, "admin.displayModules", { Server:GetModules ( ), self.moduleLog } )
 	end
 end
 
 function Admin:updateModuleLog ( module, player, action )
-	if IsValid ( player ) then
+	if IsValid ( player, false ) then
 		table.insert ( self.moduleLog, os.date ( "%X" ) ..": ".. player:GetName ( ) .."(".. tostring ( player:GetSteamId ( ) ) ..") ".. tostring ( action ) .." the module ".. tostring ( module ) )
 	end
 end
