@@ -19,7 +19,7 @@ function Mute:onModuleLoad ( )
 	if ( #result > 0 ) then
 		for _, mute in ipairs ( result ) do
 			local player = getPlayerBySteamID ( mute.steamID )
-			if IsValid ( player ) then
+			if IsValid ( player, false ) then
 				local duration = tonumber ( mute.duration ) or 0
 				if ( duration == 0 ) then
 					self:setPlayerMuted ( { steamID = mute.steamID }, false )
@@ -93,7 +93,7 @@ function Mute:setPlayerMuted ( args, state )
 			end
 			self.unmuteTimers [ args.steamID ] = setTimer ( unmutePlayer, args.duration, 1, args.steamID )
 			self.mutes [ args.steamID ] = true
-			local player = ( IsValid ( args.player ) and args.player or getPlayerBySteamID ( args.steamID ) )
+			local player = ( IsValid ( args.player, false ) and args.player or getPlayerBySteamID ( args.steamID ) )
 			if ( player ) then
 				Events:Fire ( "onPlayerMuted", player )
 			end
@@ -106,8 +106,8 @@ function Mute:setPlayerMuted ( args, state )
 				killTimer ( self.unmuteTimers [ args.steamID ] )
 			end
 			self.unmuteTimers [ args.steamID ] = nil
-			local player = ( IsValid ( args.player ) and args.player or getPlayerBySteamID ( args.steamID ) )
-			if IsValid ( player ) then
+			local player = ( IsValid ( args.player, false ) and args.player or getPlayerBySteamID ( args.steamID ) )
+			if IsValid ( player, false ) then
 				player:Message ( "You are now unmuted!", "info" )
 				Events:Fire ( "onPlayerUnmuted", player )
 			end
@@ -128,7 +128,7 @@ function unmutePlayer ( steamID )
 end
 
 function Mute:isPlayerMuted ( player )
-	if IsValid ( player ) then
+	if IsValid ( player, false ) then
 		local state = self.mutes [ tostring ( player:GetSteamId ( ) ) ]
 		return ( state == nil and false or state )
 	else
