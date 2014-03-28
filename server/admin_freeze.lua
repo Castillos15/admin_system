@@ -1,7 +1,7 @@
 local frozen = { }
 
 function setPlayerFrozen ( player, state )
-	if IsValid ( player ) then
+	if IsValid ( player, false ) then
 		frozen [ tostring ( player:GetSteamId ( ) ) ] = state
 		Network:Send ( player, "freeze.setStatus", state )
 	else
@@ -10,7 +10,7 @@ function setPlayerFrozen ( player, state )
 end
 
 function isPlayerFrozen ( player )
-	if IsValid ( player ) then
+	if IsValid ( player, false ) then
 		local steamID = tostring ( player:GetSteamId ( ) )
 		return ( frozen [ steamID ] == nil and false or frozen [ steamID ] )
 	else
