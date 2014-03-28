@@ -70,7 +70,7 @@ function banSystem:addBan ( args )
 		cmd:Execute ( )
 
 		local player = getPlayerBySteamID ( args.steamID )
-		if IsValid ( player ) then
+		if IsValid ( player, false ) then
 			Chat:Broadcast ( tostring ( args.name ) .." was banned by ".. tostring ( responsible ) .." ( ".. tostring ( reason ) .." )", Color ( 255, 0, 0 ) )
 			player:Kick ( "You were banned by ".. tostring ( responsible ) .."\n\nReason: ".. tostring ( reason ) )
 		end
